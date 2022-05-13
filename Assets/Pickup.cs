@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.MLAgents.Policies;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class Pickup : MonoBehaviour
@@ -37,6 +39,11 @@ public class Pickup : MonoBehaviour
     public void SetUse(int use) 
     {
         currentUse = use;
+    }
+
+    public void Reload()
+    {
+        itemsInReach.Clear();
     }
 
     public void SetDrop(int drop) 
@@ -79,16 +86,25 @@ public class Pickup : MonoBehaviour
         }
     }
 
+    public UnityEvent BallPickup;
+
     public void RunPickup() 
     {
         if (itemsInReach.Count > 0) 
         {
             RunDrop();
+            BallPickup.Invoke();
             inHand = itemsInReach[0];
-            itemsInReach.Remove(inHand);
-            inHand.tag = "";
+            itemsInReach.RemoveAt(0);
+            if (inHand == null)
+            {
+                Debug.Log("Ball Error");
+                return;
+            }
+            inHand.tag = "Untagged";
             inHand.transform.SetParent(this.transform);
             inHand.transform.position = transform.position;
+            inHand.GetComponent<Ball>().SetOwner(GetComponentInParent<BehaviorParameters>().TeamId);
             var rb = inHand.GetComponent<Rigidbody>();
             rb.useGravity = false;
             rb.constraints = RigidbodyConstraints.FreezeAll;

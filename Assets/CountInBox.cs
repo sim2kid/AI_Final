@@ -10,6 +10,8 @@ public class CountInBox : MonoBehaviour
 
     public TMPro.TextMeshPro text;
 
+    public int lastBallOwner = -1;
+
     public UnityEvent onBallLoss;
     public UnityEvent onBallGain;
 
@@ -25,6 +27,7 @@ public class CountInBox : MonoBehaviour
         if (other.CompareTag("Ball"))
         {
             objects.Add(other.gameObject);
+            lastBallOwner = other.GetComponent<Ball>().Owner;
             onBallGain.Invoke();
         }
         if(text != null)
@@ -33,13 +36,10 @@ public class CountInBox : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Ball"))
+        if (objects.Contains(other.gameObject))
         {
-            if (objects.Contains(other.gameObject))
-            {
-                objects.Remove(other.gameObject);
-                onBallLoss.Invoke();
-            }
+            objects.Remove(other.gameObject);
+            onBallLoss.Invoke();
         }
         if (text != null)
             text.text = Count.ToString();

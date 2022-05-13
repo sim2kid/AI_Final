@@ -16,6 +16,7 @@ namespace Game
         public Quaternion startRot;
         public CountInBox nest;
         public Pickup pickup;
+        public Transform center;
 
         public HeadMovement head;
         public MovementController body;
@@ -26,12 +27,20 @@ namespace Game
         private InputAction use;
         private InputAction drop;
 
+        private float maxBallReward = 0.5f;
+        private float totalBallReward = 0;
+
+        int group;
+
         public float DistanceToNest => Vector3.Distance(nest.transform.position, transform.position);
+        public float DistanceToCenter => Vector3.Distance(center.position, transform.position);
 
         public override void Initialize()
         {
             startPos = transform.position;
+            center = GameObject.FindGameObjectWithTag("Center").transform;
             startRot = transform.rotation;
+            group = GetComponent<BehaviorParameters>().TeamId;
             if (playerInput == null)
             {
                 playerInput = FindObjectOfType<PlayerInput>();
@@ -43,17 +52,42 @@ namespace Game
                 drop = playerInput.actions["Drop"];
             }
             nest.onBallGain.AddListener(() => {
-                AddReward(1);
-                if (nest.Count > 10) 
+                if (nest.lastBallOwner == group) 
+                {
+                    AddReward(1f);
+                }
+                if (nest.Count > 15) 
                 {
                     onEpisodeEnd();
+                    Debug.Log("Win");
                 }
             });
             nest.onBallLoss.AddListener(() => {
-                AddReward(-0.5f);
+                AddReward(-0.1f);
             });
+            foreach (var well in Knowledge.boxes) 
+            {
+                if (well != nest) 
+                {
+                    well.onBallGain.AddListener(() => 
+                    {
+                        AddReward(-0.3f);
+                    });
+                    well.onBallLoss.AddListener(() =>
+                    {
+                        AddReward(0.3f);
+                    });
+                }
+            }
             FindObjectOfType<Timer>().onTimeOut.AddListener(() => {
                 onEpisodeEnd();
+                Debug.Log("Out of Time");
+            });
+            pickup.BallPickup.AddListener(() => {
+                if (totalBallReward >= maxBallReward)
+                    return;
+                totalBallReward += 0.1f;
+                AddReward(0.1f);
             });
         }
 
@@ -61,11 +95,18 @@ namespace Game
         {
             sensor.AddObservation(pickup.BallInHand);
             sensor.AddObservation(pickup.BallInReach);
-            sensor.AddObservation(Knowledge.boxes[0].Count);
-            sensor.AddObservation(Knowledge.boxes[1].Count);
-            sensor.AddObservation(Knowledge.boxes[2].Count);
-            sensor.AddObservation(Knowledge.boxes[3].Count);
             sensor.AddObservation(DistanceToNest);
+            sensor.AddObservation(DistanceToCenter);
+            float angle = transform.rotation.eulerAngles.y + startRot.eulerAngles.y;
+            if (angle >= 360) 
+            {
+                angle -= 360;
+            }
+            if (angle < 0)
+            {
+                angle += 360;
+            }
+            sensor.AddObservation(angle);
         }
 
         public void onEpisodeEnd() 
@@ -95,8 +136,12 @@ namespace Game
 
         public override void OnEpisodeBegin()
         {
+            totalBallReward = 0;
+            body.Reset();
             transform.position = startPos;
             transform.rotation = startRot;
+            body.Run();
+            pickup.Reload();
             FindObjectOfType<SummonBall>().Reset();
             foreach (var Box in FindObjectsOfType<CountInBox>()) 
             {

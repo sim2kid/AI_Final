@@ -65,6 +65,23 @@ namespace Player.Movement
         private PlayerInput playerInput;
         private InputAction move;
 
+        public void Reset()
+        {
+            velocity = Vector3.zero;
+            JumpIsHit = false;
+            IsHeadHit = false;
+            _onGround = true;
+            _movementSpeed = Vector3.zero;
+            moveValue = Vector3.zero;
+            moveTo = Vector3.zero;
+            characterController.enabled = false;
+        }
+
+        public void Run() 
+        {
+            characterController.enabled = true;
+        }
+
         // Start is called before the first frame update
         void Start()
         {

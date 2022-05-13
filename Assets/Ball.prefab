@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6065255169567646833}
   - component: {fileID: 3951689982913197162}
   - component: {fileID: 752630342015324573}
+  - component: {fileID: 4108272906707242095}
   - component: {fileID: 8651970750986298114}
   m_Layer: 0
   m_Name: Ball
@@ -96,6 +97,23 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4108272906707242095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2940911578771442494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0303d9a5e08dfc049b21c3e8c6b14b9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Owner: -1
+  pA: {fileID: 2100000, guid: c7e3c0d279eefb54f80d2a001c97aedf, type: 2}
+  pB: {fileID: 2100000, guid: 8ba251ed2e47fda47a32f8dc8c6713ff, type: 2}
+  pC: {fileID: 2100000, guid: cc869fba1f727f54aae29a298de8c693, type: 2}
+  pD: {fileID: 2100000, guid: 76864e794f3883842a23bcaa8ed87be3, type: 2}
 --- !u!54 &8651970750986298114
 Rigidbody:
   m_ObjectHideFlags: 0
